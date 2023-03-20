@@ -3,6 +3,16 @@
 
 This is a small python tool to transcribe audio asynchronously.
 
+
+## Install
+
+1. Install [whisper](https://github.com/openai/whisper)
+1. Install the application's requirements: `pip3 install -r requirements.txt`
+1. for production deployments, install gunicorn: `pip3 install gunicorn`
+1. Install redis: `sudo apt install -y redis-server` or use a container: `podman run -p 6379:6379 docker.io/library/redis`
+
+Once all dependencies are installed, run the web server: `gunicorn -b 0.0.0.0:5000 an_transcriptions:app` and start the backround worker: `rq worker`. The worker must share a filesystem (at least `/tmp`) with the web server.
+
 ## Authentication
 
 When started, the program will attempt to read a file `api_keys.txt` from the current working directory. Each line of this file will be treated as an API key, up to the first comma character. For example:
