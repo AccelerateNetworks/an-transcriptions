@@ -33,8 +33,7 @@ redis = Redis()
 q = Queue(connection=redis)
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.before_request
 def authenticate():
@@ -45,27 +44,29 @@ def authenticate():
         return
     
     if request.headers.get("Authorization", "") not in api_keys:
-        return make_response(jsonify({'error': 'invalid api key'}), 401)
+        return jsonify({'error': 'invalid api key'}), 401
 
 
 @app.route('/')
 def index():
-    return '''
-    <!doctype html>
-    <head>
-    <title>Upload an Audio File</title>
-    </head>
-    <body>
-    <center>
-        <h1>Upload your audio file</h1>
-        <form method="post" enctype="multipart/form-data" action="/enqueue">
-            <input type=file name=file>
-            <input type=submit value=Upload>
-        </form>
-    </center>
-    </body>
-    </html>
-    '''
+    if not api_keys_enabled:
+        return '''
+        <!doctype html>
+        <head>
+        <title>Upload an Audio File</title>
+        </head>
+        <body>
+        <center>
+            <h1>Upload your audio file</h1>
+            <form method="post" enctype="multipart/form-data" action="/enqueue">
+                <input type=file name=file>
+                <input type=submit value=Upload>
+            </form>
+        </center>
+        </body>
+        </html>
+        '''
+    return jsonify({"error": "use the REST API"}), 400
 
 @app.route('/enqueue', methods=["POST"])
 def upload():
