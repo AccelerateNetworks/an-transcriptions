@@ -43,7 +43,11 @@ def authenticate():
     if request.path == "/": # always allow unauthenticated access to /
         return
     
-    if request.headers.get("Authorization", "") not in api_keys:
+    api_keys = requests.headers.get("Authorization", "")
+    if api_keys.startswith('Bearer '):
+        api_keys = api_keys[6:]
+
+    if api_keys not in api_keys:
         return jsonify({'error': 'invalid api key'}), 401
 
 
