@@ -1,6 +1,7 @@
 import os
 import time
 import sys
+import logging
 
 from flask import Flask, flash, request, redirect, url_for, send_from_directory, make_response, jsonify
 import ffmpeg
@@ -10,6 +11,8 @@ from rq import Queue, get_current_job
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
 import whisper
+
+logging.basicConfig(level=logging.DEBUG)
 
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'flac'])
 
@@ -111,4 +114,5 @@ def transcribe(filename):
     # ffmpeg.run(stream)
 
     result = model.transcribe(filename)
+    logging.debug(result)
     return result["text"]
