@@ -43,7 +43,7 @@ def authenticate():
     if request.path == "/": # always allow unauthenticated access to /
         return
     
-    api_keys = requests.headers.get("Authorization", "")
+    api_keys = request.headers.get("Authorization", "")
     if api_keys.startswith('Bearer '):
         api_keys = api_keys[6:]
 
