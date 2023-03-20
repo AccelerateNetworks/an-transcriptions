@@ -9,6 +9,7 @@ from redis import Redis
 from rq import Queue, get_current_job
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
+import whisper
 
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'flac'])
 
@@ -28,6 +29,8 @@ except FileNotFoundError:
 
 redis = Redis()
 q = Queue(connection=redis)
+
+model = whisper.load_model("base")
 
 def allowed_file(filename):
     return '.' in filename and \
