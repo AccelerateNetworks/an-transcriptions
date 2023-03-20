@@ -7,12 +7,11 @@ from flask import Flask, flash, request, redirect, url_for, send_from_directory,
 import ffmpeg
 from werkzeug.utils import secure_filename
 from redis import Redis
-from rq import Queue, get_current_job
+from rq import Queue
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
-import whisper
 
-logging.basicConfig(level=logging.DEBUG)
+from . import whisper
 
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'flac'])
 
@@ -32,8 +31,6 @@ except FileNotFoundError:
 
 redis = Redis()
 q = Queue(connection=redis)
-
-model = whisper.load_model("base")
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -84,7 +81,7 @@ def upload():
     filename = secure_filename(f.filename)
     fileLocation = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     f.save(fileLocation)
-    job = q.enqueue(transcribe, fileLocation)
+    job = q.enqueue(whisper.transcribe, fileLocation)
     return jsonify({"id": job.id}), 201
 
 @app.route('/j/<job_id>')
@@ -103,16 +100,3 @@ def get_job(job_id):
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
-
-def transcribe(filename):
-    job = get_current_job()
-    
-    # normalize file
-    # normalized = os.path.join(app.config['UPLOAD_FOLDER'], job.id + ".wav")
-    # ffmpeg_input = ffmpeg.input(filename)
-    # stream = ffmpeg.output(ffmpeg_input, normalized, acodec='pcm_s16le', ac=1, ar='16k')
-    # ffmpeg.run(stream)
-
-    result = model.transcribe(filename)
-    logging.debug(result)
-    return result["text"]
