@@ -16,7 +16,6 @@ RUN apt-get update \
   && apt-get clean \
   && groupadd -g "${GID}" python \
   && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python \
-  && mkdir -p /app/data /app/data/passports /app/static /app/media \
   && chown python:python -R /app
 
 USER python
